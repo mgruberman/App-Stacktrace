@@ -1,3 +1,4 @@
+#ifdef USE_ITHREADS
 typedef struct _ithread {
     struct _ithread *next;      /* Next thread in the list */
     struct _ithread *prev;      /* Prev thread in the list */
@@ -39,3 +40,4 @@ typedef struct {
     IV default_stack_size;
     IV page_size;
 } my_pool_t;
+#endif

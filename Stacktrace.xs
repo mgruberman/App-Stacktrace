@@ -12,10 +12,14 @@
 #include "threads.h"
 
 SV*
-perl_offsets() {
+_perl_offsets() {
     HV *hv = newHV();;
 
     V(hv, "$CXTYPEMASK", (IV)CXTYPEMASK);
+    V(hv, "$CXt_SUB", (IV)CXt_SUB);
+    V(hv, "$CXt_EVAL", (IV)CXt_EVAL);
+    V(hv, "$CXt_FORMAT", (IV)CXt_FORMAT);
+
 #ifdef USE_ITHREADS
 #  if PERL_VERSION >= 10
     V(hv, "$POOLP_main_thread", (IV)&((my_pool_t*)0)->main_thread);
@@ -79,4 +83,4 @@ perl_offsets() {
 MODULE = App::Stacktrace PACKAGE = App::Stacktrace
 
 SV*
-perl_offsets()
+_perl_offsets()

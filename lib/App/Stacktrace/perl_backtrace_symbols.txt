@@ -1,15 +1,15 @@
 # Provides the commands:
 #
-#   perl_backtrace_5_10
-#   perl_backtrace_5_12
-#   perl_backtrace_5_14
+#   perl_backtrace_5_10_0
+#   perl_backtrace_5_10_1
+#   perl_backtrace_5_12_x
+#   perl_backtrace_5_14_x
 #
 # Example usage:
 #
 #     gdb -p 7107
 #     (gdb) source gdbinit.txt
-#     (gdb) set trace-commands on
-#     (gdb) perl_backtrace
+#     (gdb) perl_backtrace_5_14_x
 #     (gdb) detach
 #     (gdb) quit
 
@@ -402,7 +402,7 @@ define perl_backtrace_5_12_threads
         perl_backtrace_an_interp
     end
 end
-define perl_backtrace_5_12
+define perl_backtrace_5_12_x
     set $CXt_SUB = 8
     set $CXt_FORMAT = 9
     set $CXt_EVAL = 10
@@ -416,7 +416,7 @@ define perl_backtrace_5_12
     end
 end
 
-define perl_backtrace_5_14
+define perl_backtrace_5_14_x
     set $CXt_SUB = 8
     set $CXt_FORMAT = 9
     set $CXt_EVAL = 10

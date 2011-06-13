@@ -9,6 +9,6 @@ diag(Dumper(\%Config));
 
 require App::Stacktrace;
 $Data::Dumper::Varname = 'perl_offsets';
-diag(Dumper(App::Stacktrace::perl_offsets()));
+diag(Dumper(App::Stacktrace::_perl_offsets()));
 
 pass('Loaded ok');

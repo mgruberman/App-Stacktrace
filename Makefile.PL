@@ -1,3 +1,4 @@
+use 5.010_000;
 use ExtUtils::MakeMaker;
 
 if (! `which gdb`) {
@@ -9,7 +10,7 @@ WriteMakefile(
   ABSTRACT_FROM => 'lib/App/Stacktrace.pm',
   AUTHOR => 'Josh Jore <jjore@cpan.org>',
   EXE_FILES => [
-    'bin/pstack'
+    'bin/perl-stacktrace'
   ],
   $ExtUtils::MakeMaker::VERSION >= 6.30
       ? (LICENSE => 'perl')

@@ -1,0 +1,22 @@
+#!/usr/bin/perl
+
+=head1 NAME
+
+perl-stacktrace - Stack trace
+
+=head1 DESCRIPTION
+
+pstack prints Perl stack traces of Perl threads for a given Perl
+process. For each Perl frame, filename and line number, if available,
+are printed.
+
+=head1 SYNOPSIS
+
+  perl-stacktrace [pid]
+    --help
+
+=cut
+
+use App::Stacktrace;
+App::Stacktrace->new->run(@ARGV);
+exit;

@@ -1,47 +1,45 @@
 # Provides the commands:
 #
-#   perl_backtrace_5_10
-#   perl_backtrace_5_12
-#   perl_backtrace_5_14
+#   perl_backtrace_5_10_x
+#   perl_backtrace_5_12_x
+#   perl_backtrace_5_14_x
 #
 # Example usage:
 #
 #     gdb -p 7107
 #     (gdb) source gdbinit.txt
-#     (gdb) set trace-commands on
-#     (gdb) perl_backtrace
+#     ... set lots of constants
+#     (gdb) perl_backtrace_5_14_x
 #     (gdb) detach
 #     (gdb) quit
 
-perl_backtrace_5_14_x -> perl_backtrace_5_12_threads
-perl_backtrace_5_14_x -> perl_backtrace_nothreads
-perl_backtrace_5_12_x -> perl_backtrace_5_12_threads
-perl_backtrace_5_12_x -> perl_backtrace_nothreads
-perl_backtrace_5_12_threads -> perl_backtrace_a_thread
-perl_backtrace_5_12_threads -> perl_backtrace_an_interp
-perl_backtrace_5_10_x -> perl_backtrace_5_10_threads
-perl_backtrace_5_10_x -> perl_backtrace_nothreads
-perl_backtrace_5_10_threads -> perl_backtrace_a_thread
-perl_backtrace_5_10_threads -> perl_backtrace_an_interp
-perl_backtrace_5_8_9 -> perl_backtrace_5_8_9_threads
-perl_backtrace_5_8_9 -> perl_backtrace_5_8_nothreads
-perl_backtrace_5_8_9_threads -> perl_backtrace_5_8_9_a_thread
-perl_backtrace_5_8_9_a_thread -> perl_backtrace_5_8_9_an_interp
-perl_backtrace_5_8_9_an_interp
-perl_backtrace_5_8_x -> perl_backtrace_5_8_threads
-perl_backtrace_5_8_x -> perl_backtrace_5_8_nothreads
-perl_backtrace_5_8_threads -> perl_backtrace_5_8_a_thread
-perl_backtrace_5_8_a_thread -> perl_backtrace_5_8_an_interp
-perl_backtrace_5_8_an_interp
-perl_backtrace_5_8_nothreads
+#perl_backtrace_5_14_x -> perl_backtrace_5_12_threads
+#perl_backtrace_5_14_x -> perl_backtrace_nothreads
+#perl_backtrace_5_12_x -> perl_backtrace_5_12_threads
+#perl_backtrace_5_12_x -> perl_backtrace_nothreads
+#perl_backtrace_5_12_threads -> perl_backtrace_a_thread
+#perl_backtrace_5_12_threads -> perl_backtrace_an_interp
+#perl_backtrace_5_10_x -> perl_backtrace_5_10_threads
+#perl_backtrace_5_10_x -> perl_backtrace_nothreads
+#perl_backtrace_5_10_threads -> perl_backtrace_a_thread
+#perl_backtrace_5_10_threads -> perl_backtrace_an_interp
+#perl_backtrace_5_8_9 -> perl_backtrace_5_8_9_threads
+#perl_backtrace_5_8_9 -> perl_backtrace_5_8_nothreads
+#perl_backtrace_5_8_9_threads -> perl_backtrace_5_8_9_a_thread
+#perl_backtrace_5_8_9_a_thread -> perl_backtrace_5_8_9_an_interp
+#perl_backtrace_5_8_9_an_interp
+#perl_backtrace_5_8_x -> perl_backtrace_5_8_threads
+#perl_backtrace_5_8_x -> perl_backtrace_5_8_nothreads
+#perl_backtrace_5_8_threads -> perl_backtrace_5_8_a_thread
+#perl_backtrace_5_8_a_thread -> perl_backtrace_5_8_an_interp
+#perl_backtrace_5_8_an_interp
+#perl_backtrace_5_8_nothreads
 #perl_backtrace_an_interp
 #perl_backtrace_a_thread 
 #perl_backtrace_nothreads
 
-
-set trace-commands on
+set trace-commands off
 set $DEBUG = 0
-set $CXTYPEMASK = 0xf
 set $PERL_ITHR_JOINABLE           =  0
 set $PERL_ITHR_DETACHED           =  1
 set $PERL_ITHR_JOINED             =  2
