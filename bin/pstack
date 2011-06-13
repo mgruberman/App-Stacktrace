@@ -1,0 +1,8 @@
+#!/usr/bin/perl
+use App::Stacktrace;
+App::Stacktrace->new->run(@ARGV);
+exit;
+
+=head1 NAME
+=head1 DESCRIPTION
+=head1 SYNOPSIS
