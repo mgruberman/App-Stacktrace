@@ -8,7 +8,8 @@ App::Stacktrace - Stack trace
 
   perl-stacktrace [option] pid
 
-    --help
+    -m      Prints a gdb script
+    --help  Show this help
 
 =head1 DESCRIPTION
 

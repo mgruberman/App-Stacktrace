@@ -4,7 +4,8 @@ NAME
 SYNOPSIS
       perl-stacktrace [option] pid
 
-        --help
+        -m      Prints a gdb script
+        --help  Show this help
 
 DESCRIPTION
     perl-stacktrace prints Perl stack traces of Perl threads for a given
