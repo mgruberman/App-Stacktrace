@@ -58,11 +58,11 @@ sub run {
     $self->_read_arguments( @_ );
 
     my $script = $self->_custom_generated_script;
-    if ($self->{exec}) {
-        $self->_run_gdb($script);
-    }
-    elsif ($self->{m}) {
+    if ($self->{m}) {
         print $script;
+    }
+    else {
+        $self->_run_gdb($script);
     }
 
     return;
