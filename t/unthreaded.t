@@ -75,6 +75,9 @@ close $pstack_rd;
 close $pstack_wr1;
 sysread $pstack_rd1, $_, 1;
 
+my ( $script_rd, $script_wr );
+pipe( $script_rd, $script_wr );
+
 $SIG{CHLD} = sub { exit };
 my $script_ppid = $$;
 my $script_pid = fork;
@@ -82,6 +85,8 @@ if (!defined $pstack_pid) {
     die "Can't fork: $!";
 }
 elsif ($script_pid) {
+    sysread $script_rd, $_, 1;
+
     require App::Stacktrace;
     open STDOUT, '>&=' . fileno( $pstack_wr );
     open STDERR, '>&=' . fileno( $pstack_wr );
@@ -102,6 +107,7 @@ sub foo {
         foo( $v );
     }
     else {
+        syswrite $script_wr, '.';
         while (1) {
             my $pstack_ppid_alive = kill 0, $pstack_ppid;
             my $script_ppid_alive = kill 0, $script_ppid;
