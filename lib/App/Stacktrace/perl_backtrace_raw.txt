@@ -4,6 +4,13 @@
 #   perl_backtrace_5_12_x
 #   perl_backtrace_5_14_x
 #
+#   perl_backtrace_5_14_x_x86_64
+#   perl_backtrace_5_14_x_thread_x86_64
+#   perl_backtrace_5_12_x_thread_x86_64
+#   perl_backtrace_5_10_1_thread_x86_64
+#
+#   perl_backtrace_5_14_x_thread_i686
+#
 # Example usage:
 #
 #     gdb -p 7107
@@ -401,4 +408,159 @@ define perl_backtrace_5_12_x
 end
 define perl_backtrace_5_14_x
     perl_backtrace_5_12_x
+end
+defined perl_backtrace_5_14_x_x86_64
+    # 5.14.0-linux-x86_64-linux: 3
+    # 5.13.11-linux-x86_64-linux: 3
+    # 5.13.3-linux-x86_64-linux: 3
+    # 5.13.2-linux-x86_64-linux: 3
+    # 5.13.4-linux-x86_64-linux: 3
+    # 5.14.0-dragonfly-x86_64-dragonfly: 2
+    # 5.13.6-linux-x86_64-linux: 2
+    # 5.13.5-linux-x86_64-linux: 2
+    # 5.13.10-linux-x86_64-linux: 2
+    # 5.13.8-linux-x86_64-linux: 2
+    # 5.13.9-linux-x86_64-linux: 2
+    # 5.13.7-linux-x86_64-linux: 2
+    # 5.14.1-linux-x86_64-linux: 1
+    set $CONTEXT_cop = 8
+    set $CONTEXT_sizeof = 80
+    set $CONTEXT_type = 0
+    set $COP_gv = 48
+    set $COP_line = 36
+    set $CXTYPEMASK = 15
+    set $CXt_EVAL = 10
+    set $CXt_FORMAT = 9
+    set $CXt_SUB = 8
+    set $GP_sv = 0
+    set $GV_gp = 16
+    set $STACKINFO_cxix = 32
+    set $STACKINFO_cxstack = 8
+    set $STACKINFO_prev = 16
+    set $SV_any = 0
+    set $SV_iv = 32
+    set $SV_pv = 16
+    perl_backtrace_5_14_x
+end
+defined perl_backtrace_5_14_x_thread_x86_64
+    # 5.14.0-linux-x86_64-linux-thread-multi: 8
+    # 5.13.11-linux-x86_64-linux-thread-multi: 4
+    # 5.15.0-linux-x86_64-linux-thread-multi: 4
+    # 5.13.8-linux-x86_64-linux-thread-multi: 3
+    # 5.13.10-linux-x86_64-linux-thread-multi: 3
+    # 5.14.1 RC1-linux-x86_64-linux-thread-multi: 2
+    # 5.13.7-linux-x86_64-linux-thread-multi: 2
+    # 5.13.9-linux-x86_64-linux-thread-multi: 2
+    # 5.14.0-linux-x86_64-linux-thread-multi-ld: 1
+    set $CONTEXT_cop = 8
+    set $CONTEXT_sizeof = 80
+    set $CONTEXT_type = 0
+    set $COP_file = 48
+    set $COP_line = 36
+    set $CXTYPEMASK = 15
+    set $CXt_EVAL = 10
+    set $CXt_FORMAT = 9
+    set $CXt_SUB = 8
+    set $GP_sv = 0
+    set $GV_gp = 16
+    set $INTERPRETER_curstackinfo = 608
+    set $INTERPRETER_modglobal = 1768
+    set $POOLP_main_thread = 0
+    set $STACKINFO_cxix = 32
+    set $STACKINFO_cxstack = 8
+    set $STACKINFO_prev = 16
+    set $SV_any = 0
+    set $SV_iv = 32
+    set $SV_pv = 16
+    set $THREAD_interpreter = 16
+    set $THREAD_next = 0
+    set $THREAD_state = 76
+    set $THREAD_tid = 24
+    perl_backtrace_5_14_x
+end
+defined perl_backtrace_5_12_x_thread_x86_64
+    # 5.12.3-linux-x86_64-linux-thread-multi: 4
+    # 5.13.0-linux-x86_64-linux-thread-multi: 2
+    # 5.12.4 RC1-linux-x86_64-linux-thread-multi: 2
+    set $CONTEXT_cop = 8
+    set $CONTEXT_sizeof = 80
+    set $CONTEXT_type = 0
+    set $COP_file = 48
+    set $COP_line = 36
+    set $CXTYPEMASK = 15
+    set $CXt_EVAL = 10
+    set $CXt_FORMAT = 9
+    set $CXt_SUB = 8
+    set $GP_sv = 0
+    set $GV_gp = 16
+    set $INTERPRETER_curstackinfo = 600
+    set $INTERPRETER_modglobal = 1736
+    set $POOLP_main_thread = 0
+    set $STACKINFO_cxix = 32
+    set $STACKINFO_cxstack = 8
+    set $STACKINFO_prev = 16
+    set $SV_any = 0
+    set $SV_iv = 24
+    set $SV_pv = 16
+    set $THREAD_interpreter = 16
+    set $THREAD_next = 0
+    set $THREAD_state = 76
+    set $THREAD_tid = 24
+    perl_backtrace_5_12_x
+end
+defined perl_backtrace_5_10_1_thread_x86_64
+    # 5.10.1-linux-x86_64-linux-thread-multi: 4
+    set $CONTEXT_cop = 8
+    set $CONTEXT_sizeof = 112
+    set $CONTEXT_type = 0
+    set $COP_file = 56
+    set $COP_line = 36
+    set $CXTYPEMASK = 255
+    set $CXt_EVAL = 2
+    set $CXt_FORMAT = 6
+    set $CXt_SUB = 1
+    set $GP_sv = 0
+    set $GV_gp = 16
+    set $INTERPRETER_curstackinfo = 592
+    set $INTERPRETER_modglobal = 1720
+    set $POOLP_main_thread = 0
+    set $STACKINFO_cxix = 32
+    set $STACKINFO_cxstack = 8
+    set $STACKINFO_prev = 16
+    set $SV_any = 0
+    set $SV_pv = 16
+    set $SV_uv = 24
+    set $THREAD_interpreter = 16
+    set $THREAD_next = 0
+    set $THREAD_state = 76
+    set $THREAD_tid = 24
+    perl_backtrace_5_10_x
+end
+defined perl_backtrace_5_14_x
+    # 5.14.1 RC1-linux-i686-linux-thread-multi: 1
+    set $CONTEXT_cop = 8
+    set $CONTEXT_sizeof = 48
+    set $CONTEXT_type = 0
+    set $COP_file = 28
+    set $COP_line = 20
+    set $CXTYPEMASK = 15
+    set $CXt_EVAL = 10
+    set $CXt_FORMAT = 9
+    set $CXt_SUB = 8
+    set $GP_sv = 0
+    set $GV_gp = 12
+    set $INTERPRETER_curstackinfo = 368
+    set $INTERPRETER_modglobal = 1080
+    set $POOLP_main_thread = 0
+    set $STACKINFO_cxix = 16
+    set $STACKINFO_cxstack = 4
+    set $STACKINFO_prev = 8
+    set $SV_any = 0
+    set $SV_iv = 16
+    set $SV_pv = 12
+    set $THREAD_interpreter = 8
+    set $THREAD_next = 0
+    set $THREAD_state = 44
+    set $THREAD_tid = 12
+    perl_backtrace_5_14_x
 end
