@@ -237,8 +237,6 @@ define perl_backtrace_5_8_a_thread
         end
         printf "thread %d %s:\n", $tid, $state
         set $interpreter = (int) *((int*) ($THREAD_interpreter + (int) $thread))
-    else
-        set $interpreter = (int) my_perl
     end
     perl_backtrace_5_8_an_interp
 end
@@ -363,7 +361,6 @@ define perl_backtrace_5_10_threads
             set $thread = (int) *((int*) ($THREAD_next + (int) $thread))
         end
     else
-        set $interpreter = (int) my_perl
         perl_backtrace_an_interp
     end
 end
@@ -391,7 +388,6 @@ define perl_backtrace_5_12_threads
             set $thread = (int) *((int*) ($THREAD_next + (int) $thread))
         end
     else
-        set $interpreter = (int) my_perl
         perl_backtrace_an_interp
     end
 end
