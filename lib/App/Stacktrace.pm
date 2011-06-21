@@ -47,6 +47,7 @@ sub new {
         pid        => undef,
         version    => undef,
         arch       => undef,
+        m          => undef,
         v          => undef,
         'exec'     => 1,
         @_

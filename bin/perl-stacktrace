@@ -14,6 +14,7 @@ are printed.
 
   perl-stacktrace [pid]
     --help
+    -m      Print gdb script
     -v      Verbose
 
 =cut
