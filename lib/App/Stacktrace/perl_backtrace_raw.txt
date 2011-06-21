@@ -38,7 +38,6 @@
 #perl_backtrace_a_thread 
 #perl_backtrace_nothreads
 
-set trace-commands off
 set $DEBUG = 0
 set $PERL_ITHR_JOINABLE           =  0
 set $PERL_ITHR_DETACHED           =  1
