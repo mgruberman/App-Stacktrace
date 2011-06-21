@@ -536,7 +536,7 @@ define perl_backtrace_5_10_1_thread_x86_64
     set $THREAD_tid = 24
     perl_backtrace_5_10_x
 end
-define perl_backtrace_5_14_x
+define perl_backtrace_5_14_x_i686
     # 5.14.1 RC1-linux-i686-linux-thread-multi: 1
     set $CONTEXT_cop = 8
     set $CONTEXT_sizeof = 48
