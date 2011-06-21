@@ -37,7 +37,7 @@ use Pod::Usage ();
 use XSLoader ();
 use File::Temp ();
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 XSLoader::load(__PACKAGE__, $VERSION);
 
