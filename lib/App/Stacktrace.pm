@@ -158,7 +158,15 @@ sub _TODO_add_constants {
 TODO_preamble
 
     if ($self->{verbose}) {
-        $src .= "set trace-commands on\n";
+        $src .= <<VERBOSE;
+set trace-commands on
+set \$DEBUG = 1
+VERBOSE
+    }
+    else {
+        $src .= <<QUIET;
+set \$DEBUG = 0
+QUIET
     }
 
     my $offsets = App::Stacktrace::_perl_offsets();
@@ -215,6 +223,10 @@ sub _run_gdb {
     print { $tmp } $src;
     $tmp->flush;
     $tmp->sync;
+
+    if ($self->{verbose}) {
+        print $src;
+    }
 
     my @cmd = (
         'gdb',
