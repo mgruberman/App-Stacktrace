@@ -17,6 +17,20 @@ perl-stacktrace prints Perl stack traces of Perl threads for a given
 Perl process. For each Perl frame, the full file name and line number
 are printed.
 
+For example, a stack dump of a running perl program:
+
+    $ ps x | grep cpan
+    24077 pts/12   T      0:01 /usr/local/bin/perl /usr/local/bin/cpan
+    24093 pts/12   S+     0:00 grep cpan
+
+    $ perl-stacktrace 24077
+    0x00d73416 in __kernel_vsyscall ()
+    /usr/local/bin/cpan:11
+    /usr/local/lib/perl5/5.12.2/App/Cpan.pm:364
+    /usr/local/lib/perl5/5.12.2/App/Cpan.pm:295
+    /usr/local/lib/perl5/5.12.2/CPAN.pm:339
+    /usr/local/lib/perl5/5.12.2/Term/ReadLine.pm:198
+
 =head1 API
 
 =over
