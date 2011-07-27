@@ -33,13 +33,28 @@ For example, a stack dump of a running perl program:
 
 =head1 API
 
-=over
+There exists an internal API
 
-=item new
+=head2 new
 
-=item run
+This accepts the following parameters by applying them through
+L<Getopt::Long>. This is actually just a front for the script
+F<perl-stacktrace>'s command line handling.
 
-=back
+  App::Stacktrace->new(
+      $pid,       # The process to attach to
+      'm',        # Dump the generated script
+      'v',        # Verbose
+      'exec',     # exec() into gdb
+      '--noexec', # system() into gdb
+  );
+
+=head2 run
+
+Runs the app program as configured by the C<< ->new(...) >> method.
+
+    $obj = App::Stacktrace->new( ... );
+    $obj->run;
 
 =cut
 
@@ -57,25 +72,26 @@ XSLoader::load(__PACKAGE__, $VERSION);
 
 sub new {
     my $class = shift;
-    my $self = {
-        pid        => undef,
-        version    => undef,
-        arch       => undef,
-        m          => undef,
-        v          => undef,
-        'exec'     => 1,
-        @_
-    };
-    return bless $self, $class;
+    my $self = {};
+    bless $self, $class;
+
+    $self->_read_arguments( @_ );
+
+    return $self;
 }
 
 sub run {
     my $self = shift;
 
-    $self->_read_arguments( @_ );
+    if ($self->{help}) {
+        Pod::Usage::pod2usage(
+            -verbose => 2,
+            -exitcode => 0,
+        );
+    }
 
     my $script = $self->_custom_generated_script;
-    if ($self->{m}) {
+    if ($self->{dump_script}) {
         print $script;
     }
     else {
@@ -88,30 +104,29 @@ sub run {
 sub _read_arguments {
     my $self = shift;
     local @ARGV = @_;
+    my %args;
     Getopt::Long::GetOptions(
-        $self,
-        help => sub {
-            Pod::Usage::pod2usage(
-                -verbose => 2,
-                -exitcode => 0 );
-        },
+         \ %args,
+        'help',
         'm',
         'v',
-        'exec',
-        'version=s',
-        'arch=s',
+        'exec!',
     )
       or Pod::Usage::pod2usage(
         -verbose => 2,
         -exitcode => 2 );
     if (1 == @ARGV && $ARGV[0] =~ /^\d+$/) {
-        $self->{pid} = shift @ARGV;
+        $args{pid} = shift @ARGV;
     }
     if (@ARGV) {
         Pod::Usage::pod2usage( -verbose => 2, -exitcode => 2 );
     }
-    unless ($self->{pid} || $self->{m}) {
-    }
+
+    $self->{help}        = $args{help};
+    $self->{pid}         = $args{pid};
+    $self->{dump_script} = $args{m};
+    $self->{verbose}     = $args{v};
+    $self->{exec}        = $args{exec};
 
     return;
 }
@@ -142,7 +157,7 @@ sub _TODO_add_constants {
 #
 TODO_preamble
 
-    if ($self->{v}) {
+    if ($self->{verbose}) {
         $src .= "set trace-commands on\n";
     }
 

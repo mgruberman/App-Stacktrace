@@ -20,5 +20,5 @@ are printed.
 =cut
 
 use App::Stacktrace;
-App::Stacktrace->new->run(@ARGV);
+App::Stacktrace->new(@ARGV)->run;
 exit;
