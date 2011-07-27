@@ -45,7 +45,6 @@
 #perl_backtrace_a_thread 
 #perl_backtrace_nothreads
 
-set $DEBUG = 0
 set $PERL_ITHR_JOINABLE           =  0
 set $PERL_ITHR_DETACHED           =  1
 set $PERL_ITHR_JOINED             =  2
@@ -57,22 +56,134 @@ set $PERL_ITHR_DIED               = 32
 set $PERL_ITHR_UNCALLABLE  = $PERL_ITHR_DETACHED | $PERL_ITHR_JOINED
 
 define perl_backtrace_an_interp
-    set $stackinfo = (int) *((int*) ($INTERPRETER_curstackinfo + (int) $interpreter))
+    if $DEBUG
+        printf "interpreter=%#x\n", $interpreter
+        if $interpreter
+            x/128xw $interpreter
+            print $stackinfo = (int) *((int*) ($INTERPRETER_curstackinfo + (int) $interpreter))
+        else
+            print $stackinfo = (int) *((int*) ($INTERPRETER_curstackinfo + (int) $interpreter))
+        end
+    else
+        if $interpreter
+            set $stackinfo = (int) *((int*) ($INTERPRETER_curstackinfo + (int) $interpreter))
+        else
+            set $stackinfo = 0
+        end
+    end
     while $stackinfo != 0
-        set $cxstack = (int) *((int*) ($STACKINFO_cxstack + (int) $stackinfo))
-        set $cxix = (int) *((int*) ($STACKINFO_cxix + (int) $stackinfo))
+        if $DEBUG
+            printf "stackinfo=%#x\n", $stackinfo
+            if $stackinfo
+                x/128xw $stackinfo
+                print $cxstack = (int) *((int*) ($STACKINFO_cxstack + (int) $stackinfo))
+            else
+                print $cxstack = (int) *((int*) ($STACKINFO_cxstack + (int) $stackinfo))
+            end
+        else
+            if $stackinfo
+                set $cxstack = (int) *((int*) ($STACKINFO_cxstack + (int) $stackinfo))
+            else
+                set $cxstack = 0
+            end
+        end
+        if $DEBUG
+            printf "stackinfo=%#x\n", $stackinfo
+            if $stackinfo
+                x/128xw $stackinfo
+                print $cxix = (int) *((int*) ($STACKINFO_cxix + (int) $stackinfo))
+            else
+                print $cxix = (int) *((int*) ($STACKINFO_cxix + (int) $stackinfo))
+            end
+        else
+            if $stackinfo
+                set $cxix = (int) *((int*) ($STACKINFO_cxix + (int) $stackinfo))
+            else
+                set $cxix = 0
+            end
+        end
         set $i = 0
         while $i <= $cxix
-            set $context = (int) (($CONTEXT_sizeof * $i) + (int) $cxstack)
-            set $type = (int) (((int) *((int*) ($CONTEXT_type + (int) $context))) & $CXTYPEMASK)
+            if $DEBUG
+                printf "cxstack=%#x\n", $cxstack
+                if $cxstack
+                    x/128xw $cxstack
+                    print $context = (int) (($CONTEXT_sizeof * $i) + (int) $cxstack)
+                else
+                    print $context = (int) (($CONTEXT_sizeof * $i) + (int) $cxstack)
+                end
+            else
+                if $cxstack
+                    set $context = (int) (($CONTEXT_sizeof * $i) + (int) $cxstack)
+                else
+                    set $context = 0
+                end
+            end
+            if $DEBUG
+                printf "context=%#x\n", $context
+                if $context
+                    x/128xw $context
+                    print $type = (int) (((int) *((int*) ($CONTEXT_type + (int) $context))) & $CXTYPEMASK)
+                else
+                    print $type = (int) (((int) *((int*) ($CONTEXT_type + (int) $context))) & $CXTYPEMASK)
+                end
+            else
+                if $context
+                    set $type = (int) (((int) *((int*) ($CONTEXT_type + (int) $context))) & $CXTYPEMASK)
+                else
+                    set $type = 0
+                end
+            end
             if $type == $CXt_SUB || $type == $CXt_EVAL || $type == $CXt_FORMAT
                 set $file = 0
-                set $cop = (int) *((int*) ($CONTEXT_cop + (int) $context))
-                set $file = (char*) *(int*) ($COP_file + (int) $cop)
+                if $DEBUG
+                    printf "context=%#x\n", $context
+                    if $context
+                        x/128xw $context
+                        print $cop = (int) *((int*) ($CONTEXT_cop + (int) $context))
+                    else
+                        print $cop = (int) *((int*) ($CONTEXT_cop + (int) $context))
+                    end
+                else
+                    if $context
+                        set $cop = (int) *((int*) ($CONTEXT_cop + (int) $context))
+                    else
+                        set $cop = 0
+                    end
+                end
+                if $DEBUG
+                    printf "cop=%#x\n", $cop
+                    if $cop
+                        x/128xw $cop
+                        print $file = (char*) *(int*) ($COP_file + (int) $cop)
+                    else
+                        print $file = (char*) *(int*) ($COP_file + (int) $cop)
+                    end
+                else
+                    if $cop
+                        set $file = (char*) *(int*) ($COP_file + (int) $cop)
+                    else
+                        set $file = 0
+                    end
+                end
                 if $file == 0
                     set $file = "undef"
                 end
-                set $line = (int) *((int*) ($COP_line + (int) $cop))
+                if $DEBUG
+                    printf "cop=%#x\n", $cop
+                    if $cop
+                        x/128xw $cop
+                        print $line = (int) *((int*) ($COP_line + (int) $cop))
+                    else
+                        print $line = (int) *((int*) ($COP_line + (int) $cop))
+                    end
+                else
+                    if $cop
+                        set $line = (int) *((int*) ($COP_line + (int) $cop))
+                    else
+                        set $line = 0
+                    end
+                end
                 printf "%s:%d\n", $file, $line
             else
                 if $DEBUG
@@ -81,12 +192,54 @@ define perl_backtrace_an_interp
             end
             set $i = $i + 1
         end
-        set $stackinfo = (int) *((int*) ($STACKINFO_prev + (int) $stackinfo))
+        if $DEBUG
+            printf "stackinfo=%#x\n", $stackinfo
+            if $stackinfo
+                x/128xw $stackinfo
+                print $stackinfo = (int) *((int*) ($STACKINFO_prev + (int) $stackinfo))
+            else
+                print $stackinfo = (int) *((int*) ($STACKINFO_prev + (int) $stackinfo))
+            end
+        else
+            if $stackinfo
+                set $stackinfo = (int) *((int*) ($STACKINFO_prev + (int) $stackinfo))
+            else
+                set $stackinfo = 0
+            end
+        end
     end
 end
 define perl_backtrace_a_thread
-    set $tid = (int) *((int*) ($THREAD_tid + (int) $thread))
-    set $statei = (int) *((int*) ($THREAD_state + (int) $thread))
+    if $DEBUG
+        printf "thread=%#x\n", $thread
+        if $thread
+            x/128xw $thread
+            print $tid = (int) *((int*) ($THREAD_tid + (int) $thread))
+        else
+            print $tid = (int) *((int*) ($THREAD_tid + (int) $thread))
+        end
+    else
+        if $thread
+            set $tid = (int) *((int*) ($THREAD_tid + (int) $thread))
+        else
+            set $tid = 0
+        end
+    end
+    if $DEBUG
+        printf "thread=%#x\n", $thread
+        if $thread
+            x/128xw $thread
+            print $statei = (int) *((int*) ($THREAD_state + (int) $thread))
+        else
+            print $statei = (int) *((int*) ($THREAD_state + (int) $thread))
+        end
+    else
+        if $thread
+            set $statei = (int) *((int*) ($THREAD_state + (int) $thread))
+        else
+            set $statei = 0
+        end
+    end
     if $statei == $PERL_ITHR_DETACHED
         set $state = "detached"
     else
@@ -117,57 +270,323 @@ define perl_backtrace_a_thread
         end
     end
     printf "thread %d %s:\n", $tid, $state
-    set $interpreter = (int) *((int*) ($THREAD_interpreter + (int) $thread))
+    if $DEBUG
+        printf "thread=%#x\n", $thread
+        if $thread
+            x/128xw $thread
+            print $interpreter = (int) *((int*) ($THREAD_interpreter + (int) $thread))
+        else
+            print $interpreter = (int) *((int*) ($THREAD_interpreter + (int) $thread))
+        end
+    else
+        if $thread
+            set $interpreter = (int) *((int*) ($THREAD_interpreter + (int) $thread))
+        else
+            set $interpreter = 0
+        end
+    end
     perl_backtrace_an_interp
 end
 define perl_backtrace_nothreads
     set $stackinfo = (int) PL_curstackinfo
     while $stackinfo
-        set $cxstack = (int) *((int*) ($STACKINFO_cxstack + (int) $stackinfo))
-        set $cxix = (int) *((int*) ($STACKINFO_cxix + (int) $stackinfo))
+        if $DEBUG
+            printf "stackinfo=%#x\n", $stackinfo
+            if $stackinfo
+                x/128xw $stackinfo
+                print $cxstack = (int) *((int*) ($STACKINFO_cxstack + (int) $stackinfo))
+            else
+                print $cxstack = (int) *((int*) ($STACKINFO_cxstack + (int) $stackinfo))
+            end
+        else
+            if $stackinfo
+                set $cxstack = (int) *((int*) ($STACKINFO_cxstack + (int) $stackinfo))
+            else
+                set $cxstack = 0
+            end
+        end
+        if $DEBUG
+            printf "stackinfo=%#x\n", $stackinfo
+            if $stackinfo
+                x/128xw $stackinfo
+                print $cxix = (int) *((int*) ($STACKINFO_cxix + (int) $stackinfo))
+            else
+                print $cxix = (int) *((int*) ($STACKINFO_cxix + (int) $stackinfo))
+            end
+        else
+            if $stackinfo
+                set $cxix = (int) *((int*) ($STACKINFO_cxix + (int) $stackinfo))
+            else
+                set $cxix = 0
+            end
+        end
         set $i = 0
         while $i <= $cxix
-            set $context = (int) (($CONTEXT_sizeof * $i) + (int) $cxstack)
-            set $type = (int) (((int) *((int*) ($CONTEXT_type + (int) $context))) & $CXTYPEMASK)
+            if $DEBUG
+                printf "cxstack=%#x\n", $cxstack
+                if $cxstack
+                    x/128xw $cxstack
+                    print $context = (int) (($CONTEXT_sizeof * $i) + (int) $cxstack)
+                else
+                    print $context = (int) (($CONTEXT_sizeof * $i) + (int) $cxstack)
+                end
+            else
+                if $cxstack
+                    set $context = (int) (($CONTEXT_sizeof * $i) + (int) $cxstack)
+                else
+                    set $context = 0
+                end
+            end
+            if $DEBUG
+                printf "context=%#x\n", $context
+                if $context
+                    x/128xw $context
+                    print $type = (int) (((int) *((int*) ($CONTEXT_type + (int) $context))) & $CXTYPEMASK)
+                else
+                    print $type = (int) (((int) *((int*) ($CONTEXT_type + (int) $context))) & $CXTYPEMASK)
+                end
+            else
+                if $context
+                    set $type = (int) (((int) *((int*) ($CONTEXT_type + (int) $context))) & $CXTYPEMASK)
+                else
+                    set $type = 0
+                end
+            end
             if $type == $CXt_SUB || $type == $CXt_EVAL || $type == $CXt_FORMAT
                 set $file = 0
-                set $cop = (int) *((int*) ($CONTEXT_cop + (int) $context))
-                set $gv = (int) *((int*) ($COP_gv + (int) $cop))
+                if $DEBUG
+                    printf "context=%#x\n", $context
+                    if $context
+                        x/128xw $context
+                        print $cop = (int) *((int*) ($CONTEXT_cop + (int) $context))
+                    else
+                        print $cop = (int) *((int*) ($CONTEXT_cop + (int) $context))
+                    end
+                else
+                    if $context
+                        set $cop = (int) *((int*) ($CONTEXT_cop + (int) $context))
+                    else
+                        set $cop = 0
+                    end
+                end
+                if $DEBUG
+                    printf "cop=%#x\n", $cop
+                    if $cop
+                        x/128xw $cop
+                        print $gv = (int) *((int*) ($COP_gv + (int) $cop))
+                    else
+                        print $gv = (int) *((int*) ($COP_gv + (int) $cop))
+                    end
+                else
+                    if $cop
+                        set $gv = (int) *((int*) ($COP_gv + (int) $cop))
+                    else
+                        set $gv = 0
+                    end
+                end
                 if $gv
-                    set $sv = (int) *((int*) ($GP_sv + *((int*) ($GV_gp + (int) $gv))))
+                    if $DEBUG
+                        printf "gv=%#x\n", $gv
+                        if $gv
+                            x/128xw $gv
+                            print $sv = (int) *((int*) ($GP_sv + *((int*) ($GV_gp + (int) $gv))))
+                        else
+                            print $sv = (int) *((int*) ($GP_sv + *((int*) ($GV_gp + (int) $gv))))
+                        end
+                    else
+                        if $gv
+                            set $sv = (int) *((int*) ($GP_sv + *((int*) ($GV_gp + (int) $gv))))
+                        else
+                            set $sv = 0
+                        end
+                    end
                     if $sv
-                        set $file = (char*) *(int*) ($SV_pv + (int) $sv)
+                        if $DEBUG
+                            printf "sv=%#x\n", $sv
+                            if $sv
+                                x/128xw $sv
+                                print $file = (char*) *(int*) ($SV_pv + (int) $sv)
+                            else
+                                print $file = (char*) *(int*) ($SV_pv + (int) $sv)
+                            end
+                        else
+                            if $sv
+                                set $file = (char*) *(int*) ($SV_pv + (int) $sv)
+                            else
+                                set $file = 0
+                            end
+                        end
                     end
                 end
                 if ! $file
                     set $file = "undef"
                 end
-                set $line = (int) *((int*) ($COP_line + (int) $cop))
+                if $DEBUG
+                    printf "cop=%#x\n", $cop
+                    if $cop
+                        x/128xw $cop
+                        print $line = (int) *((int*) ($COP_line + (int) $cop))
+                    else
+                        print $line = (int) *((int*) ($COP_line + (int) $cop))
+                    end
+                else
+                    if $cop
+                        set $line = (int) *((int*) ($COP_line + (int) $cop))
+                    else
+                        set $line = 0
+                    end
+                end
                 printf "%s:%d\n", $file, $line
             end
             set $i = $i + 1
         end
-        set $stackinfo = (int) *((int*) ($STACKINFO_prev + (int) $stackinfo))
+        if $DEBUG
+            printf "stackinfo=%#x\n", $stackinfo
+            if $stackinfo
+                x/128xw $stackinfo
+                print $stackinfo = (int) *((int*) ($STACKINFO_prev + (int) $stackinfo))
+            else
+                print $stackinfo = (int) *((int*) ($STACKINFO_prev + (int) $stackinfo))
+            end
+        else
+            if $stackinfo
+                set $stackinfo = (int) *((int*) ($STACKINFO_prev + (int) $stackinfo))
+            else
+                set $stackinfo = 0
+            end
+        end
     end
 end
 
 define perl_backtrace_5_8_an_interp
-    set $stackinfo = (int) *((int*) ($INTERPRETER_curstackinfo + (int) $interpreter))
+    if $DEBUG
+        printf "interpreter=%#x\n", $interpreter
+        if $interpreter
+            x/128xw $interpreter
+            print $stackinfo = (int) *((int*) ($INTERPRETER_curstackinfo + (int) $interpreter))
+        else
+            print $stackinfo = (int) *((int*) ($INTERPRETER_curstackinfo + (int) $interpreter))
+        end
+    else
+        if $interpreter
+            set $stackinfo = (int) *((int*) ($INTERPRETER_curstackinfo + (int) $interpreter))
+        else
+            set $stackinfo = 0
+        end
+    end
     while $stackinfo
-        set $cxstack = (int) *((int*) ($STACKINFO_cxstack + (int) $stackinfo))
-        set $cxix = (int) *((int*) ($STACKINFO_cxix + (int) $stackinfo))
+        if $DEBUG
+            printf "stackinfo=%#x\n", $stackinfo
+            if $stackinfo
+                x/128xw $stackinfo
+                print $cxstack = (int) *((int*) ($STACKINFO_cxstack + (int) $stackinfo))
+            else
+                print $cxstack = (int) *((int*) ($STACKINFO_cxstack + (int) $stackinfo))
+            end
+        else
+            if $stackinfo
+                set $cxstack = (int) *((int*) ($STACKINFO_cxstack + (int) $stackinfo))
+            else
+                set $cxstack = 0
+            end
+        end
+        if $DEBUG
+            printf "stackinfo=%#x\n", $stackinfo
+            if $stackinfo
+                x/128xw $stackinfo
+                print $cxix = (int) *((int*) ($STACKINFO_cxix + (int) $stackinfo))
+            else
+                print $cxix = (int) *((int*) ($STACKINFO_cxix + (int) $stackinfo))
+            end
+        else
+            if $stackinfo
+                set $cxix = (int) *((int*) ($STACKINFO_cxix + (int) $stackinfo))
+            else
+                set $cxix = 0
+            end
+        end
         set $i = 0
         while $i <= $cxix
-            set $context = (int) (($CONTEXT_sizeof * $i) + (int) $cxstack)
-            set $type = (int) (((int) *($CONTEXT_type + (int) $context)) & $CXTYPEMASK)
+            if $DEBUG
+                printf "cxstack=%#x\n", $cxstack
+                if $cxstack
+                    x/128xw $cxstack
+                    print $context = (int) (($CONTEXT_sizeof * $i) + (int) $cxstack)
+                else
+                    print $context = (int) (($CONTEXT_sizeof * $i) + (int) $cxstack)
+                end
+            else
+                if $cxstack
+                    set $context = (int) (($CONTEXT_sizeof * $i) + (int) $cxstack)
+                else
+                    set $context = 0
+                end
+            end
+            if $DEBUG
+                printf "context=%#x\n", $context
+                if $context
+                    x/128xw $context
+                    print $type = (int) (((int) *($CONTEXT_type + (int) $context)) & $CXTYPEMASK)
+                else
+                    print $type = (int) (((int) *($CONTEXT_type + (int) $context)) & $CXTYPEMASK)
+                end
+            else
+                if $context
+                    set $type = (int) (((int) *($CONTEXT_type + (int) $context)) & $CXTYPEMASK)
+                else
+                    set $type = 0
+                end
+            end
             if $type == $CXt_SUB || $type == $CXt_EVAL || $type == $CXt_FORMAT
                 set $file = 0
-                set $cop = (int) *((int*) ($CONTEXT_cop + (int) $context))
-                set $file = (char*) *(int*) ($COP_file + (int) $cop)
+                if $DEBUG
+                    printf "context=%#x\n", $context
+                    if $context
+                        x/128xw $context
+                        print $cop = (int) *((int*) ($CONTEXT_cop + (int) $context))
+                    else
+                        print $cop = (int) *((int*) ($CONTEXT_cop + (int) $context))
+                    end
+                else
+                    if $context
+                        set $cop = (int) *((int*) ($CONTEXT_cop + (int) $context))
+                    else
+                        set $cop = 0
+                    end
+                end
+                if $DEBUG
+                    printf "cop=%#x\n", $cop
+                    if $cop
+                        x/128xw $cop
+                        print $file = (char*) *(int*) ($COP_file + (int) $cop)
+                    else
+                        print $file = (char*) *(int*) ($COP_file + (int) $cop)
+                    end
+                else
+                    if $cop
+                        set $file = (char*) *(int*) ($COP_file + (int) $cop)
+                    else
+                        set $file = 0
+                    end
+                end
                 if ! $file
                     set $file = "undef"
                 end
-                set $line = (int) *((int*) ($COP_line + (int) $cop))
+                if $DEBUG
+                    printf "cop=%#x\n", $cop
+                    if $cop
+                        x/128xw $cop
+                        print $line = (int) *((int*) ($COP_line + (int) $cop))
+                    else
+                        print $line = (int) *((int*) ($COP_line + (int) $cop))
+                    end
+                else
+                    if $cop
+                        set $line = (int) *((int*) ($COP_line + (int) $cop))
+                    else
+                        set $line = 0
+                    end
+                end
                 printf "%s:%d\n", $file, $line
             else
                 if $DEBUG
@@ -176,43 +595,225 @@ define perl_backtrace_5_8_an_interp
             end
             set $i = $i + 1
         end
-        set $stackinfo = (int) *((int*) ($STACKINFO_prev + (int) $stackinfo))
+        if $DEBUG
+            printf "stackinfo=%#x\n", $stackinfo
+            if $stackinfo
+                x/128xw $stackinfo
+                print $stackinfo = (int) *((int*) ($STACKINFO_prev + (int) $stackinfo))
+            else
+                print $stackinfo = (int) *((int*) ($STACKINFO_prev + (int) $stackinfo))
+            end
+        else
+            if $stackinfo
+                set $stackinfo = (int) *((int*) ($STACKINFO_prev + (int) $stackinfo))
+            else
+                set $stackinfo = 0
+            end
+        end
     end
 end
 define perl_backtrace_5_8_nothreads
     set $stackinfo = (int) PL_curstackinfo
     while $stackinfo
-        set $cxstack = (int) *((int*) ($STACKINFO_cxstack + (int) $stackinfo))
-        set $cxix = (int) *((int*) ($STACKINFO_cxix + (int) $stackinfo))
+        if $DEBUG
+            printf "stackinfo=%#x\n", $stackinfo
+            if $stackinfo
+                x/128xw $stackinfo
+                print $cxstack = (int) *((int*) ($STACKINFO_cxstack + (int) $stackinfo))
+            else
+                print $cxstack = (int) *((int*) ($STACKINFO_cxstack + (int) $stackinfo))
+            end
+        else
+            if $stackinfo
+                set $cxstack = (int) *((int*) ($STACKINFO_cxstack + (int) $stackinfo))
+            else
+                set $cxstack = 0
+            end
+        end
+        if $DEBUG
+            printf "stackinfo=%#x\n", $stackinfo
+            if $stackinfo
+                x/128xw $stackinfo
+                print $cxix = (int) *((int*) ($STACKINFO_cxix + (int) $stackinfo))
+            else
+                print $cxix = (int) *((int*) ($STACKINFO_cxix + (int) $stackinfo))
+            end
+        else
+            if $stackinfo
+                set $cxix = (int) *((int*) ($STACKINFO_cxix + (int) $stackinfo))
+            else
+                set $cxix = 0
+            end
+        end
         set $i = 0
         while $i <= $cxix
-            set $context = (int) (($CONTEXT_sizeof * $i) + (int) $cxstack)
-            set $type = (int) (((int) *($CONTEXT_type + (int) $context)) & $CXTYPEMASK)
+            if $DEBUG
+                printf "cxstack=%#x\n", $cxstack
+                if $cxstack
+                    x/128xw $cxstack
+                    print $context = (int) (($CONTEXT_sizeof * $i) + (int) $cxstack)
+                else
+                    print $context = (int) (($CONTEXT_sizeof * $i) + (int) $cxstack)
+                end
+            else
+                if $cxstack
+                    set $context = (int) (($CONTEXT_sizeof * $i) + (int) $cxstack)
+                else
+                    set $context = 0
+                end
+            end
+            if $DEBUG
+                printf "context=%#x\n", $context
+                if $context
+                    x/128xw $context
+                    print $type = (int) (((int) *($CONTEXT_type + (int) $context)) & $CXTYPEMASK)
+                else
+                    print $type = (int) (((int) *($CONTEXT_type + (int) $context)) & $CXTYPEMASK)
+                end
+            else
+                if $context
+                    set $type = (int) (((int) *($CONTEXT_type + (int) $context)) & $CXTYPEMASK)
+                else
+                    set $type = 0
+                end
+            end
             if $type == $CXt_SUB || $type == $CXt_EVAL || $type == $CXt_FORMAT
-                set $cop = (int) *((int*) ($CONTEXT_cop + (int) $context))
-                set $gv = (int) *((int*) ($COP_gv + (int) $cop))
+                if $DEBUG
+                    printf "context=%#x\n", $context
+                    if $context
+                        x/128xw $context
+                        print $cop = (int) *((int*) ($CONTEXT_cop + (int) $context))
+                    else
+                        print $cop = (int) *((int*) ($CONTEXT_cop + (int) $context))
+                    end
+                else
+                    if $context
+                        set $cop = (int) *((int*) ($CONTEXT_cop + (int) $context))
+                    else
+                        set $cop = 0
+                    end
+                end
+                if $DEBUG
+                    printf "cop=%#x\n", $cop
+                    if $cop
+                        x/128xw $cop
+                        print $gv = (int) *((int*) ($COP_gv + (int) $cop))
+                    else
+                        print $gv = (int) *((int*) ($COP_gv + (int) $cop))
+                    end
+                else
+                    if $cop
+                        set $gv = (int) *((int*) ($COP_gv + (int) $cop))
+                    else
+                        set $gv = 0
+                    end
+                end
                 if $gv
-                    set $sv = (int) *((int*) ($GP_sv + *((int*) ($GV_gp + *((int*) ($SV_any + (int) $gv))))))
+                    if $DEBUG
+                        printf "gv=%#x\n", $gv
+                        if $gv
+                            x/128xw $gv
+                            print $sv = (int) *((int*) ($GP_sv + *((int*) ($GV_gp + *((int*) ($SV_any + (int) $gv))))))
+                        else
+                            print $sv = (int) *((int*) ($GP_sv + *((int*) ($GV_gp + *((int*) ($SV_any + (int) $gv))))))
+                        end
+                    else
+                        if $gv
+                            set $sv = (int) *((int*) ($GP_sv + *((int*) ($GV_gp + *((int*) ($SV_any + (int) $gv))))))
+                        else
+                            set $sv = 0
+                        end
+                    end
                     if $sv
-                        set $file =  (char*) ($XPV_pv + (int) *((int*) ($SV_any + (int) $sv)))
+                        if $DEBUG
+                            printf "sv=%#x\n", $sv
+                            if $sv
+                                x/128xw $sv
+                                print $file = (char*) ($XPV_pv + (int) *((int*) ($SV_any + (int) $sv)))
+                            else
+                                print $file = (char*) ($XPV_pv + (int) *((int*) ($SV_any + (int) $sv)))
+                            end
+                        else
+                            if $sv
+                                set $file = (char*) ($XPV_pv + (int) *((int*) ($SV_any + (int) $sv)))
+                            else
+                                set $file = 0
+                            end
+                        end
                     else
                         set $file = "undef"
                     end
                 else
                     set $file = "undef"
                 end
-                set $line = (int) *((int*) ($COP_line + (int) $cop))
+                if $DEBUG
+                    printf "cop=%#x\n", $cop
+                    if $cop
+                        x/128xw $cop
+                        print $line = (int) *((int*) ($COP_line + (int) $cop))
+                    else
+                        print $line = (int) *((int*) ($COP_line + (int) $cop))
+                    end
+                else
+                    if $cop
+                        set $line = (int) *((int*) ($COP_line + (int) $cop))
+                    else
+                        set $line = 0
+                    end
+                end
                 printf "%s:%d\n", $file, $line
             end
             set $i = $i + 1
         end
-        set $stackinfo = (int) *((int*) ($STACKINFO_prev + (int) $stackinfo))
+        if $DEBUG
+            printf "stackinfo=%#x\n", $stackinfo
+            if $stackinfo
+                x/128xw $stackinfo
+                print $stackinfo = (int) *((int*) ($STACKINFO_prev + (int) $stackinfo))
+            else
+                print $stackinfo = (int) *((int*) ($STACKINFO_prev + (int) $stackinfo))
+            end
+        else
+            if $stackinfo
+                set $stackinfo = (int) *((int*) ($STACKINFO_prev + (int) $stackinfo))
+            else
+                set $stackinfo = 0
+            end
+        end
     end
 end
 define perl_backtrace_5_8_a_thread
     if $thread
-        set $tid = (int) *((int*) ($THREAD_tid + (int) $thread))
-        set $statei = (int) *((int*) ($THREAD_state + (int) $thread))
+        if $DEBUG
+            printf "thread=%#x\n", $thread
+            if $thread
+                x/128xw $thread
+                print $tid = (int) *((int*) ($THREAD_tid + (int) $thread))
+            else
+                print $tid = (int) *((int*) ($THREAD_tid + (int) $thread))
+            end
+        else
+            if $thread
+                set $tid = (int) *((int*) ($THREAD_tid + (int) $thread))
+            else
+                set $tid = 0
+            end
+        end
+        if $DEBUG
+            printf "thread=%#x\n", $thread
+            if $thread
+                x/128xw $thread
+                print $statei = (int) *((int*) ($THREAD_state + (int) $thread))
+            else
+                print $statei = (int) *((int*) ($THREAD_state + (int) $thread))
+            end
+        else
+            if $thread
+                set $statei = (int) *((int*) ($THREAD_state + (int) $thread))
+            else
+                set $statei = 0
+            end
+        end
         if $statei == $PERL_ITHR_DETACHED
             set $state = "detached"
         else
@@ -243,19 +844,75 @@ define perl_backtrace_5_8_a_thread
             end
         end
         printf "thread %d %s:\n", $tid, $state
-        set $interpreter = (int) *((int*) ($THREAD_interpreter + (int) $thread))
+        if $DEBUG
+            printf "thread=%#x\n", $thread
+            if $thread
+                x/128xw $thread
+                print $interpreter = (int) *((int*) ($THREAD_interpreter + (int) $thread))
+            else
+                print $interpreter = (int) *((int*) ($THREAD_interpreter + (int) $thread))
+            end
+        else
+            if $thread
+                set $interpreter = (int) *((int*) ($THREAD_interpreter + (int) $thread))
+            else
+                set $interpreter = 0
+            end
+        end
     end
     perl_backtrace_5_8_an_interp
 end
 define perl_backtrace_5_8_threads
     set $main_thread = (int) threads
-    set $thread = $main_thread
+    if $DEBUG
+        printf "main_thread=%#x\n", $main_thread
+        if $main_thread
+            x/128xw $main_thread
+            print $thread = $main_thread
+        else
+            print $thread = $main_thread
+        end
+    else
+        if $main_thread
+            set $thread = $main_thread
+        else
+            set $thread = 0
+        end
+    end
     perl_backtrace_5_8_a_thread
     if $thread
-        set $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+        if $DEBUG
+            printf "thread=%#x\n", $thread
+            if $thread
+                x/128xw $thread
+                print $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+            else
+                print $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+            end
+        else
+            if $thread
+                set $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+            else
+                set $thread = 0
+            end
+        end
         while $thread && $thread != $main_thread
             perl_backtrace_5_8_a_thread
-            set $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+            if $DEBUG
+                printf "thread=%#x\n", $thread
+                if $thread
+                    x/128xw $thread
+                    print $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+                else
+                    print $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+                end
+            else
+                if $thread
+                    set $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+                else
+                    set $thread = 0
+                end
+            end
         end
     end
 end
@@ -269,22 +926,134 @@ define perl_backtrace_5_8_x
 end
 
 define perl_backtrace_5_8_9_an_interp
-    set $stackinfo = (int) *((int*) ($INTERPRETER_curstackinfo + (int) $interpreter))
+    if $DEBUG
+        printf "interpreter=%#x\n", $interpreter
+        if $interpreter
+            x/128xw $interpreter
+            print $stackinfo = (int) *((int*) ($INTERPRETER_curstackinfo + (int) $interpreter))
+        else
+            print $stackinfo = (int) *((int*) ($INTERPRETER_curstackinfo + (int) $interpreter))
+        end
+    else
+        if $interpreter
+            set $stackinfo = (int) *((int*) ($INTERPRETER_curstackinfo + (int) $interpreter))
+        else
+            set $stackinfo = 0
+        end
+    end
     while $stackinfo
-        set $cxstack = (int) *((int*) ($STACKINFO_cxstack + (int) $stackinfo))
-        set $cxix = (int) *((int*) ($STACKINFO_cxix + (int) $stackinfo))
+        if $DEBUG
+            printf "stackinfo=%#x\n", $stackinfo
+            if $stackinfo
+                x/128xw $stackinfo
+                print $cxstack = (int) *((int*) ($STACKINFO_cxstack + (int) $stackinfo))
+            else
+                print $cxstack = (int) *((int*) ($STACKINFO_cxstack + (int) $stackinfo))
+            end
+        else
+            if $stackinfo
+                set $cxstack = (int) *((int*) ($STACKINFO_cxstack + (int) $stackinfo))
+            else
+                set $cxstack = 0
+            end
+        end
+        if $DEBUG
+            printf "stackinfo=%#x\n", $stackinfo
+            if $stackinfo
+                x/128xw $stackinfo
+                print $cxix = (int) *((int*) ($STACKINFO_cxix + (int) $stackinfo))
+            else
+                print $cxix = (int) *((int*) ($STACKINFO_cxix + (int) $stackinfo))
+            end
+        else
+            if $stackinfo
+                set $cxix = (int) *((int*) ($STACKINFO_cxix + (int) $stackinfo))
+            else
+                set $cxix = 0
+            end
+        end
         set $i = 0
         while $i <= $cxix
-            set $context = (int) (($CONTEXT_sizeof * $i) + (int) $cxstack)
-            set $type = (int) (((int) *((int*) ($CONTEXT_type + (int) $context))) & $CXTYPEMASK)
+            if $DEBUG
+                printf "cxstack=%#x\n", $cxstack
+                if $cxstack
+                    x/128xw $cxstack
+                    print $context = (int) (($CONTEXT_sizeof * $i) + (int) $cxstack)
+                else
+                    print $context = (int) (($CONTEXT_sizeof * $i) + (int) $cxstack)
+                end
+            else
+                if $cxstack
+                    set $context = (int) (($CONTEXT_sizeof * $i) + (int) $cxstack)
+                else
+                    set $context = 0
+                end
+            end
+            if $DEBUG
+                printf "context=%#x\n", $context
+                if $context
+                    x/128xw $context
+                    print $type = (int) (((int) *((int*) ($CONTEXT_type + (int) $context))) & $CXTYPEMASK)
+                else
+                    print $type = (int) (((int) *((int*) ($CONTEXT_type + (int) $context))) & $CXTYPEMASK)
+                end
+            else
+                if $context
+                    set $type = (int) (((int) *((int*) ($CONTEXT_type + (int) $context))) & $CXTYPEMASK)
+                else
+                    set $type = 0
+                end
+            end
             if $type == $CXt_SUB || $type == $CXt_EVAL || $type == $CXt_FORMAT
                 set $file = 0
-                set $cop = (int) *((int*) ($CONTEXT_cop + (int) $context))
-                set $file = (char*) *(int*) ($COP_file + (int) $cop)
+                if $DEBUG
+                    printf "context=%#x\n", $context
+                    if $context
+                        x/128xw $context
+                        print $cop = (int) *((int*) ($CONTEXT_cop + (int) $context))
+                    else
+                        print $cop = (int) *((int*) ($CONTEXT_cop + (int) $context))
+                    end
+                else
+                    if $context
+                        set $cop = (int) *((int*) ($CONTEXT_cop + (int) $context))
+                    else
+                        set $cop = 0
+                    end
+                end
+                if $DEBUG
+                    printf "cop=%#x\n", $cop
+                    if $cop
+                        x/128xw $cop
+                        print $file = (char*) *(int*) ($COP_file + (int) $cop)
+                    else
+                        print $file = (char*) *(int*) ($COP_file + (int) $cop)
+                    end
+                else
+                    if $cop
+                        set $file = (char*) *(int*) ($COP_file + (int) $cop)
+                    else
+                        set $file = 0
+                    end
+                end
                 if ! $file
                     set $file = "undef"
                 end
-                set $line = (int) *((int*) ($COP_line + (int) $cop))
+                if $DEBUG
+                    printf "cop=%#x\n", $cop
+                    if $cop
+                        x/128xw $cop
+                        print $line = (int) *((int*) ($COP_line + (int) $cop))
+                    else
+                        print $line = (int) *((int*) ($COP_line + (int) $cop))
+                    end
+                else
+                    if $cop
+                        set $line = (int) *((int*) ($COP_line + (int) $cop))
+                    else
+                        set $line = 0
+                    end
+                end
                 printf "%s:%d\n", $file, $line
             else
                 if $DEBUG
@@ -293,12 +1062,54 @@ define perl_backtrace_5_8_9_an_interp
             end
             set $i = $i + 1
         end
-        set $stackinfo = (int) *((int*) ($STACKINFO_prev + (int) $stackinfo))
+        if $DEBUG
+            printf "stackinfo=%#x\n", $stackinfo
+            if $stackinfo
+                x/128xw $stackinfo
+                print $stackinfo = (int) *((int*) ($STACKINFO_prev + (int) $stackinfo))
+            else
+                print $stackinfo = (int) *((int*) ($STACKINFO_prev + (int) $stackinfo))
+            end
+        else
+            if $stackinfo
+                set $stackinfo = (int) *((int*) ($STACKINFO_prev + (int) $stackinfo))
+            else
+                set $stackinfo = 0
+            end
+        end
     end
 end
 define perl_backtrace_5_8_9_a_thread
-    set $tid = (int) *((int*) ($THREAD_tid + (int) $thread))
-    set $statei = (int) *((int*) ($THREAD_state + (int) $thread))
+    if $DEBUG
+        printf "thread=%#x\n", $thread
+        if $thread
+            x/128xw $thread
+            print $tid = (int) *((int*) ($THREAD_tid + (int) $thread))
+        else
+            print $tid = (int) *((int*) ($THREAD_tid + (int) $thread))
+        end
+    else
+        if $thread
+            set $tid = (int) *((int*) ($THREAD_tid + (int) $thread))
+        else
+            set $tid = 0
+        end
+    end
+    if $DEBUG
+        printf "thread=%#x\n", $thread
+        if $thread
+            x/128xw $thread
+            print $statei = (int) *((int*) ($THREAD_state + (int) $thread))
+        else
+            print $statei = (int) *((int*) ($THREAD_state + (int) $thread))
+        end
+    else
+        if $thread
+            set $statei = (int) *((int*) ($THREAD_state + (int) $thread))
+        else
+            set $statei = 0
+        end
+    end
     if $statei == $PERL_ITHR_DETACHED
         set $state = "detached"
     else
@@ -329,18 +1140,74 @@ define perl_backtrace_5_8_9_a_thread
         end
     end
     printf "thread %d %s:\n", $tid, $state
-    set $interpreter = (int) *((int*) ($THREAD_interpreter + (int) $thread))
+    if $DEBUG
+        printf "thread=%#x\n", $thread
+        if $thread
+            x/128xw $thread
+            print $interpreter = (int) *((int*) ($THREAD_interpreter + (int) $thread))
+        else
+            print $interpreter = (int) *((int*) ($THREAD_interpreter + (int) $thread))
+        end
+    else
+        if $thread
+            set $interpreter = (int) *((int*) ($THREAD_interpreter + (int) $thread))
+        else
+            set $interpreter = 0
+        end
+    end
     perl_backtrace_5_8_9_an_interp
 end
 define perl_backtrace_5_8_9_threads
     set $main_thread = (int) threads
-    set $thread = $main_thread
+    if $DEBUG
+        printf "main_thread=%#x\n", $main_thread
+        if $main_thread
+            x/128xw $main_thread
+            print $thread = $main_thread
+        else
+            print $thread = $main_thread
+        end
+    else
+        if $main_thread
+            set $thread = $main_thread
+        else
+            set $thread = 0
+        end
+    end
     perl_backtrace_5_8_9_a_thread
     if $thread
-        set $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+        if $DEBUG
+            printf "thread=%#x\n", $thread
+            if $thread
+                x/128xw $thread
+                print $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+            else
+                print $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+            end
+        else
+            if $thread
+                set $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+            else
+                set $thread = 0
+            end
+        end
         while $thread && $thread != $main_thread
             perl_backtrace_5_8_9_a_thread
-            set $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+            if $DEBUG
+                printf "thread=%#x\n", $thread
+                if $thread
+                    x/128xw $thread
+                    print $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+                else
+                    print $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+                end
+            else
+                if $thread
+                    set $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+                else
+                    set $thread = 0
+                end
+            end
         end
     end
 end
@@ -353,19 +1220,167 @@ define perl_backtrace_5_8_9
     end
 end
 define perl_backtrace_5_10_threads
-    set $modglobal = (int) *((int*) ($INTERPRETER_modglobal + (int) $interpreter))
-    set $my_pool_svp = (int) Perl_hv_fetch((int) $interpreter, (int) $modglobal, $POOL_KEY, $POOL_KEY_LEN, 0)
+    if $DEBUG
+        printf "interpreter=%#x\n", $interpreter
+        if $interpreter
+            x/128xw $interpreter
+            print $modglobal = (int) *((int*) ($INTERPRETER_modglobal + (int) $interpreter))
+        else
+            print $modglobal = (int) *((int*) ($INTERPRETER_modglobal + (int) $interpreter))
+        end
+    else
+        if $interpreter
+            set $modglobal = (int) *((int*) ($INTERPRETER_modglobal + (int) $interpreter))
+        else
+            set $modglobal = 0
+        end
+    end
+    if $DEBUG
+        if $interpreter
+            if $modglobal
+                printf "interpreter=%#x\n", $interpreter
+                x/128xw $interpreter
+                printf "modglobal=%#x\n", $modglobal
+                x/128xw $modglobal
+                print $my_pool_svp = (int) Perl_hv_fetch((int) $interpreter, (int) $modglobal, $POOL_KEY, $POOL_KEY_LEN, 0)
+            else
+                printf "interpreter=%#x\n", $interpreter
+                x/128xw $interpreter
+                printf "modglobal=%#x\n", $modglobal
+                print $my_pool_svp = 0
+            end
+        else
+            if $modglobal
+                printf "interpreter=%#x\n", $interpreter
+                printf "modglobal=%#x\n", $modglobal
+                x/128xw $modglobal
+                print $my_pool_svp = 0
+            else
+                printf "interpreter=%#x\n", $interpreter
+                printf "modglobal=%#x\n", $modglobal
+                print $my_pool_svp = 0
+            end
+        end
+    else
+        if $interpreter
+            if $modglobal
+                set $my_pool_svp = (int) Perl_hv_fetch((int) $interpreter, (int) $modglobal, $POOL_KEY, $POOL_KEY_LEN, 0)
+            else
+                set $my_pool_svp = 0
+            end
+        else
+            set $my_pool_svp = 0
+        end
+    end
     if $my_pool_svp
-        set $my_pool_sv = (int) *((int*) (int) $my_pool_svp)
-        set $my_pool_svval = (int) *((int*) ($SV_any + (int) $my_pool_sv))
-        set $my_poolp = (int) *((int*) ($SV_iv + (int) $my_pool_svval))
-        set $main_thread = $POOLP_main_thread + (int) $my_poolp
-        set $thread = $main_thread
+        if $DEBUG
+            printf "my_pool_svp=%#x\n", $my_pool_svp
+            if $my_pool_svp
+                x/128xw $my_pool_svp
+                print $my_pool_sv = (int) *((int*) (int) $my_pool_svp)
+            else
+                print $my_pool_sv = (int) *((int*) (int) $my_pool_svp)
+            end
+        else
+            if $my_pool_svp
+                set $my_pool_sv = (int) *((int*) (int) $my_pool_svp)
+            else
+                set $my_pool_sv = 0
+            end
+        end
+        if $DEBUG
+            printf "my_pool_sv=%#x\n", $my_pool_sv
+            if $my_pool_sv
+                x/128xw $my_pool_sv
+                print $my_pool_svval = (int) *((int*) ($SV_any + (int) $my_pool_sv))
+            else
+                print $my_pool_svval = (int) *((int*) ($SV_any + (int) $my_pool_sv))
+            end
+        else
+            if $my_pool_sv
+                set $my_pool_svval = (int) *((int*) ($SV_any + (int) $my_pool_sv))
+            else
+                set $my_pool_svval = 0
+            end
+        end
+        if $DEBUG
+            printf "my_pool_svval=%#x\n", $my_pool_svval
+            if $my_pool_svval
+                x/128xw $my_pool_svval
+                print $my_poolp = (int) *((int*) ($SV_iv + (int) $my_pool_svval))
+            else
+                print $my_poolp = (int) *((int*) ($SV_iv + (int) $my_pool_svval))
+            end
+        else
+            if $my_pool_svval
+                set $my_poolp = (int) *((int*) ($SV_iv + (int) $my_pool_svval))
+            else
+                set $my_poolp = 0
+            end
+        end
+        if $DEBUG
+            printf "my_poolp=%#x\n", $my_poolp
+            if $my_poolp
+                x/128xw $my_poolp
+                print $main_thread = $POOLP_main_thread + (int) $my_poolp
+            else
+                print $main_thread = $POOLP_main_thread + (int) $my_poolp
+            end
+        else
+            if $my_poolp
+                set $main_thread = $POOLP_main_thread + (int) $my_poolp
+            else
+                set $main_thread = 0
+            end
+        end
+        if $DEBUG
+            printf "main_thread=%#x\n", $main_thread
+            if $main_thread
+                x/128xw $main_thread
+                print $thread = $main_thread
+            else
+                print $thread = $main_thread
+            end
+        else
+            if $main_thread
+                set $thread = $main_thread
+            else
+                set $thread = 0
+            end
+        end
         perl_backtrace_a_thread
-        set $thread = (int) *((int*) ($THREAD_next + (int) $main_thread))
+        if $DEBUG
+            printf "main_thread=%#x\n", $main_thread
+            if $main_thread
+                x/128xw $main_thread
+                print $thread = (int) *((int*) ($THREAD_next + (int) $main_thread))
+            else
+                print $thread = (int) *((int*) ($THREAD_next + (int) $main_thread))
+            end
+        else
+            if $main_thread
+                set $thread = (int) *((int*) ($THREAD_next + (int) $main_thread))
+            else
+                set $thread = 0
+            end
+        end
         while $thread != $main_thread
             perl_backtrace_a_thread
-            set $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+            if $DEBUG
+                printf "thread=%#x\n", $thread
+                if $thread
+                    x/128xw $thread
+                    print $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+                else
+                    print $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+                end
+            else
+                if $thread
+                    set $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+                else
+                    set $thread = 0
+                end
+            end
         end
     else
         perl_backtrace_an_interp
@@ -380,19 +1395,167 @@ define perl_backtrace_5_10_x
     end
 end
 define perl_backtrace_5_12_threads
-    set $modglobal = (int) *((int*) ($INTERPRETER_modglobal + (int) $interpreter))
-    set $my_pool_svp = (int) Perl_hv_fetch((int) $interpreter, (int) $modglobal, $POOL_KEY, $POOL_KEY_LEN, 0)
+    if $DEBUG
+        printf "interpreter=%#x\n", $interpreter
+        if $interpreter
+            x/128xw $interpreter
+            print $modglobal = (int) *((int*) ($INTERPRETER_modglobal + (int) $interpreter))
+        else
+            print $modglobal = (int) *((int*) ($INTERPRETER_modglobal + (int) $interpreter))
+        end
+    else
+        if $interpreter
+            set $modglobal = (int) *((int*) ($INTERPRETER_modglobal + (int) $interpreter))
+        else
+            set $modglobal = 0
+        end
+    end
+    if $DEBUG
+        if $interpreter
+            if $modglobal
+                printf "interpreter=%#x\n", $interpreter
+                x/128xw $interpreter
+                printf "modglobal=%#x\n", $modglobal
+                x/128xw $modglobal
+                print $my_pool_svp = (int) Perl_hv_fetch((int) $interpreter, (int) $modglobal, $POOL_KEY, $POOL_KEY_LEN, 0)
+            else
+                printf "interpreter=%#x\n", $interpreter
+                x/128xw $interpreter
+                printf "modglobal=%#x\n", $modglobal
+                print $my_pool_svp = 0
+            end
+        else
+            if $modglobal
+                printf "interpreter=%#x\n", $interpreter
+                printf "modglobal=%#x\n", $modglobal
+                x/128xw $modglobal
+                print $my_pool_svp = 0
+            else
+                printf "interpreter=%#x\n", $interpreter
+                printf "modglobal=%#x\n", $modglobal
+                print $my_pool_svp = 0
+            end
+        end
+    else
+        if $interpreter
+            if $modglobal
+                set $my_pool_svp = (int) Perl_hv_fetch((int) $interpreter, (int) $modglobal, $POOL_KEY, $POOL_KEY_LEN, 0)
+            else
+                set $my_pool_svp = 0
+            end
+        else
+            set $my_pool_svp = 0
+        end
+    end
     if $my_pool_svp
-        set $my_pool_sv = (int) *((int*) (int) $my_pool_svp)
-        set $my_pool_svval = (int) *((int*) ($SV_any + (int) $my_pool_sv))
-        set $my_poolp = (int) *((int*) ($SV_uv + (int) $my_pool_svval))
-        set $main_thread = $POOLP_main_thread + (int) $my_poolp
-        set $thread = $main_thread
+        if $DEBUG
+            printf "my_pool_svp=%#x\n", $my_pool_svp
+            if $my_pool_svp
+                x/128xw $my_pool_svp
+                print $my_pool_sv = (int) *((int*) (int) $my_pool_svp)
+            else
+                print $my_pool_sv = (int) *((int*) (int) $my_pool_svp)
+            end
+        else
+            if $my_pool_svp
+                set $my_pool_sv = (int) *((int*) (int) $my_pool_svp)
+            else
+                set $my_pool_sv = 0
+            end
+        end
+        if $DEBUG
+            printf "my_pool_sv=%#x\n", $my_pool_sv
+            if $my_pool_sv
+                x/128xw $my_pool_sv
+                print $my_pool_svval = (int) *((int*) ($SV_any + (int) $my_pool_sv))
+            else
+                print $my_pool_svval = (int) *((int*) ($SV_any + (int) $my_pool_sv))
+            end
+        else
+            if $my_pool_sv
+                set $my_pool_svval = (int) *((int*) ($SV_any + (int) $my_pool_sv))
+            else
+                set $my_pool_svval = 0
+            end
+        end
+        if $DEBUG
+            printf "my_pool_svval=%#x\n", $my_pool_svval
+            if $my_pool_svval
+                x/128xw $my_pool_svval
+                print $my_poolp = (int) *((int*) ($SV_uv + (int) $my_pool_svval))
+            else
+                print $my_poolp = (int) *((int*) ($SV_uv + (int) $my_pool_svval))
+            end
+        else
+            if $my_pool_svval
+                set $my_poolp = (int) *((int*) ($SV_uv + (int) $my_pool_svval))
+            else
+                set $my_poolp = 0
+            end
+        end
+        if $DEBUG
+            printf "my_poolp=%#x\n", $my_poolp
+            if $my_poolp
+                x/128xw $my_poolp
+                print $main_thread = $POOLP_main_thread + (int) $my_poolp
+            else
+                print $main_thread = $POOLP_main_thread + (int) $my_poolp
+            end
+        else
+            if $my_poolp
+                set $main_thread = $POOLP_main_thread + (int) $my_poolp
+            else
+                set $main_thread = 0
+            end
+        end
+        if $DEBUG
+            printf "main_thread=%#x\n", $main_thread
+            if $main_thread
+                x/128xw $main_thread
+                print $thread = $main_thread
+            else
+                print $thread = $main_thread
+            end
+        else
+            if $main_thread
+                set $thread = $main_thread
+            else
+                set $thread = 0
+            end
+        end
         perl_backtrace_a_thread
-        set $thread = (int) *((int*) ($THREAD_next + (int) $main_thread))
+        if $DEBUG
+            printf "main_thread=%#x\n", $main_thread
+            if $main_thread
+                x/128xw $main_thread
+                print $thread = (int) *((int*) ($THREAD_next + (int) $main_thread))
+            else
+                print $thread = (int) *((int*) ($THREAD_next + (int) $main_thread))
+            end
+        else
+            if $main_thread
+                set $thread = (int) *((int*) ($THREAD_next + (int) $main_thread))
+            else
+                set $thread = 0
+            end
+        end
         while $thread != $main_thread
             perl_backtrace_a_thread
-            set $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+            if $DEBUG
+                printf "thread=%#x\n", $thread
+                if $thread
+                    x/128xw $thread
+                    print $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+                else
+                    print $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+                end
+            else
+                if $thread
+                    set $thread = (int) *((int*) ($THREAD_next + (int) $thread))
+                else
+                    set $thread = 0
+                end
+            end
         end
     else
         perl_backtrace_an_interp
