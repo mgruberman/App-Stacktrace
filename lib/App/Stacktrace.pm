@@ -113,6 +113,7 @@ sub _read_arguments {
         'help',
         'm',
         'v',
+        'c',
         'exec!',
     )
       or Pod::Usage::pod2usage(
@@ -129,6 +130,7 @@ sub _read_arguments {
     $self->{pid}         = $args{pid};
     $self->{dump_script} = $args{m};
     $self->{verbose}     = $args{v};
+    $self->{c_backtrace} = $args{v} || $args{c};
     $self->{exec}        = $args{exec};
 
     return;
@@ -192,6 +194,12 @@ THREADS
         or die "Can't open $template_script: $!";
     local $/;
     $src .= readline $template_fh;
+
+    if ($self->{c_backtrace}) {
+        $src .= <<"C_BACKTRACE";
+backtrace
+C_BACKTRACE
+    }
 
     my $command = $self->_command_for_version;
     $src .= <<"INVOKE";
