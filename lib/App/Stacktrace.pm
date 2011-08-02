@@ -10,6 +10,7 @@ App::Stacktrace - Stack trace
 
     -m      Prints a gdb script
     -v      Verbose debugging
+    -c      Additionally, prints C stacktrace
     --help  Show this help
 
     --exec  exec() into gdb
