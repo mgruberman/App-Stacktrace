@@ -9,7 +9,10 @@ App::Stacktrace - Stack trace
   perl-stacktrace [option] pid
 
     -m      Prints a gdb script
+    -v      Verbose debugging
     --help  Show this help
+
+    --exec  exec() into gdb
 
 =head1 DESCRIPTION
 
