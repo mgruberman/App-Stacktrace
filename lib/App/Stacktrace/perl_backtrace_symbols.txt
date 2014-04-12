@@ -35,6 +35,19 @@ define perl_backtrace_an_interp
             set $context = $cxstack[$i]
             set $type = $context->cx_u.cx_subst.sbu_type & $CXTYPEMASK
             if $type == $CXt_SUB || $type == $CXt_EVAL || $type == $CXt_FORMAT
+	        if $type == $CXt_SUB
+		   $type_name = "sub"
+	        else
+		   if $type == CXt_EVAL
+		      $type_name = "eval"
+                   else
+		   	if $type_name = $CXt_FORMAT
+			   type_name = "FORMAT"
+			else
+			   type_name = "???"
+			end
+		   end
+                end
                 set $file = 0
                 set $cop = $context->cx_u.cx_blk.blku_oldcop
                 set $file = $cop->cop_file
@@ -42,7 +55,7 @@ define perl_backtrace_an_interp
                     set $file = "undef"
                 end
                 set $line = $cop->cop_line
-                printf "%s:%d\n", $file, $line
+                printf "%s:%d (%s)\n", $$file, $line, $type_name
             else
                 if $DEBUG
                     printf "%d\t... # (context*){cx_type=%d}\n", $i, $type
@@ -99,6 +112,19 @@ define perl_backtrace_nothreads
             set $context = $cxstack[$i]
             set $type = $context->cx_u.cx_subst.sbu_type & $CXTYPEMASK
             if $type == $CXt_SUB || $type == $CXt_EVAL || $type == $CXt_FORMAT
+	        if $type == $CXt_SUB
+		   $type_name = "sub"
+	        else
+		   if $type == CXt_EVAL
+		      $type_name = "eval"
+                   else
+		   	if $type_name = $CXt_FORMAT
+			   type_name = "FORMAT"
+			else
+			   type_name = "???"
+			end
+		   end
+                end
                 set $file = 0
                 set $cop = $context->cx_u.cx_blk.blku_oldcop
                 set $gv = $cop->cop_filegv
@@ -112,7 +138,7 @@ define perl_backtrace_nothreads
                     set $file = "undef"
                 end
                 set $line = $cop->cop_line
-                printf "%s:%d\n", $file, $line
+                printf "%s:%d (%s)\n", $$file, $line, $type_name
             end
             set $i = $i + 1
         end
@@ -130,6 +156,19 @@ define perl_backtrace_5_8_an_interp
             set $context = $cxstack[$i]
             set $type = $context->cx_type & $CXTYPEMASK
             if $type == $CXt_SUB || $type == $CXt_EVAL || $type == $CXt_FORMAT
+	        if $type == $CXt_SUB
+		   $type_name = "sub"
+	        else
+		   if $type == CXt_EVAL
+		      $type_name = "eval"
+                   else
+		   	if $type_name = $CXt_FORMAT
+			   type_name = "FORMAT"
+			else
+			   type_name = "???"
+			end
+		   end
+                end
                 set $file = 0
                 set $cop = $context->cx_u.cx_blk.blku_oldcop
                 set $file = $cop->cop_file
@@ -137,7 +176,7 @@ define perl_backtrace_5_8_an_interp
                     set $file = "undef"
                 end
                 set $line = $cop->cop_line
-                printf "%s:%d\n", $file, $line
+                printf "%s:%d (%s)\n", $$file, $line, $type_name
             else
                 if $DEBUG
                     printf "%d\t... # (context*){cx_type=%d}\n", $i, $type
@@ -158,6 +197,19 @@ define perl_backtrace_5_8_nothreads
             set $context = $cxstack[$i]
             set $type = $context->cx_type & $CXTYPEMASK
             if $type == $CXt_SUB || $type == $CXt_EVAL || $type == $CXt_FORMAT
+	        if $type == $CXt_SUB
+		   $type_name = "sub"
+	        else
+		   if $type == CXt_EVAL
+		      $type_name = "eval"
+                   else
+		   	if $type_name = $CXt_FORMAT
+			   type_name = "FORMAT"
+			else
+			   type_name = "???"
+			end
+		   end
+                end
                 set $cop = $context->cx_u.cx_blk.blku_oldcop
                 set $gv = $cop->cop_filegv
                 if $gv
@@ -171,7 +223,7 @@ define perl_backtrace_5_8_nothreads
                     set $file = "undef"
                 end
                 set $line = $cop->cop_line
-                printf "%s:%d\n", $file, $line
+                printf "%s:%d (%s)\n", $$file, $line, $type_name
             end
             set $i = $i + 1
         end
@@ -252,6 +304,19 @@ define perl_backtrace_5_8_9_an_interp
             set $context = $cxstack[$i]
             set $type = $context->cx_u.cx_subst.sbu_type & $CXTYPEMASK
             if $type == $CXt_SUB || $type == $CXt_EVAL || $type == $CXt_FORMAT
+	        if $type == $CXt_SUB
+		   $type_name = "sub"
+	        else
+		   if $type == CXt_EVAL
+		      $type_name = "eval"
+                   else
+		   	if $type_name = $CXt_FORMAT
+			   type_name = "FORMAT"
+			else
+			   type_name = "???"
+			end
+		   end
+                end
                 set $file = 0
                 set $cop = $context->cx_u.cx_blk.blku_oldcop
                 set $file = $cop->cop_file
@@ -259,7 +324,7 @@ define perl_backtrace_5_8_9_an_interp
                     set $file = "undef"
                 end
                 set $line = $cop->cop_line
-                printf "%s:%d\n", $file, $line
+                printf "%s:%d (%s)\n", $$file, $line, $type_name
             else
                 if $DEBUG
                     printf "%d\t... # (context*){cx_type=%d}\n", $i, $type
