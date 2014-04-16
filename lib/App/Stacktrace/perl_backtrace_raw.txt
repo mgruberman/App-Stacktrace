@@ -138,7 +138,7 @@ define perl_backtrace_an_interp
 	        if $type == $CXt_SUB
 		   set $type_name = "sub"
 	        else
-		   if $type == CXt_EVAL
+		   if $type == $CXt_EVAL
 		      set $type_name = "eval"
                    else
 		   	if $type_name = $CXt_FORMAT
@@ -369,7 +369,7 @@ define perl_backtrace_nothreads
 	        if $type == $CXt_SUB
 		   set $type_name = "sub"
 	        else
-		   if $type == CXt_EVAL
+		   if $type == $CXt_EVAL
 		      set $type_name = "eval"
                    else
 		   	if $type_name = $CXt_FORMAT
@@ -567,7 +567,7 @@ define perl_backtrace_5_8_an_interp
 	        if $type == $CXt_SUB
 		   set $type_name = "sub"
 	        else
-		   if $type == CXt_EVAL
+		   if $type == $CXt_EVAL
 		      set $type_name = "eval"
                    else
 		   	if $type_name = $CXt_FORMAT
@@ -720,7 +720,7 @@ define perl_backtrace_5_8_nothreads
 	        if $type == $CXt_SUB
 		   $type_name = "sub"
 	        else
-		   if $type == CXt_EVAL
+		   if $type == $CXt_EVAL
 		      $type_name = "eval"
                    else
 		   	if $type_name = $CXt_FORMAT
