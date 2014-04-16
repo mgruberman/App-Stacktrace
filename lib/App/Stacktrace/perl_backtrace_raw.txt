@@ -42,7 +42,7 @@
 #perl_backtrace_5_8_an_interp
 #perl_backtrace_5_8_nothreads
 #perl_backtrace_an_interp
-#perl_backtrace_a_thread 
+#perl_backtrace_a_thread
 #perl_backtrace_nothreads
 
 set $PERL_ITHR_JOINABLE           =  0
@@ -135,6 +135,19 @@ define perl_backtrace_an_interp
                 end
             end
             if $type == $CXt_SUB || $type == $CXt_EVAL || $type == $CXt_FORMAT
+	        if $type == $CXt_SUB
+		   set $type_name = "sub"
+	        else
+		   if $type == $CXt_EVAL
+		      set $type_name = "eval"
+                   else
+		   	if $type_name = $CXt_FORMAT
+			   set $type_name = "FORMAT"
+			else
+			   set $type_name = "???"
+			end
+		   end
+                end
                 set $file = 0
                 if $DEBUG
                     printf "context=%#x\n", $context
@@ -184,7 +197,7 @@ define perl_backtrace_an_interp
                         set $line = 0
                     end
                 end
-                printf "%s:%d\n", $file, $line
+                printf "%s:%d (%s)\n", $file, $line, $type_name
             else
                 if $DEBUG
                     printf "%d\t... # (context*){cx_type=%d}\n", $i, $type
@@ -353,6 +366,19 @@ define perl_backtrace_nothreads
                 end
             end
             if $type == $CXt_SUB || $type == $CXt_EVAL || $type == $CXt_FORMAT
+	        if $type == $CXt_SUB
+		   set $type_name = "sub"
+	        else
+		   if $type == $CXt_EVAL
+		      set $type_name = "eval"
+                   else
+		   	if $type_name = $CXt_FORMAT
+			   set $type_name = "FORMAT"
+			else
+			   set $type_name = "???"
+			end
+		   end
+                end
                 set $file = 0
                 if $DEBUG
                     printf "context=%#x\n", $context
@@ -436,7 +462,7 @@ define perl_backtrace_nothreads
                         set $line = 0
                     end
                 end
-                printf "%s:%d\n", $file, $line
+                printf "%s:%d (%s)\n", $file, $line, $type_name
             end
             set $i = $i + 1
         end
@@ -538,6 +564,19 @@ define perl_backtrace_5_8_an_interp
                 end
             end
             if $type == $CXt_SUB || $type == $CXt_EVAL || $type == $CXt_FORMAT
+	        if $type == $CXt_SUB
+		   set $type_name = "sub"
+	        else
+		   if $type == $CXt_EVAL
+		      set $type_name = "eval"
+                   else
+		   	if $type_name = $CXt_FORMAT
+			   set $type_name = "FORMAT"
+			else
+			   set $type_name = "???"
+			end
+		   end
+                end
                 set $file = 0
                 if $DEBUG
                     printf "context=%#x\n", $context
@@ -587,7 +626,7 @@ define perl_backtrace_5_8_an_interp
                         set $line = 0
                     end
                 end
-                printf "%s:%d\n", $file, $line
+                printf "%s:%d (%s)\n", $file, $line, $type_name
             else
                 if $DEBUG
                     printf "%d\t... # (context*){cx_type=%d}\n", $i, $type
@@ -678,6 +717,19 @@ define perl_backtrace_5_8_nothreads
                 end
             end
             if $type == $CXt_SUB || $type == $CXt_EVAL || $type == $CXt_FORMAT
+	        if $type == $CXt_SUB
+		   $type_name = "sub"
+	        else
+		   if $type == $CXt_EVAL
+		      $type_name = "eval"
+                   else
+		   	if $type_name = $CXt_FORMAT
+			   set $type_name = "FORMAT"
+			else
+			   set $type_name = "???"
+			end
+		   end
+                end
                 if $DEBUG
                     printf "context=%#x\n", $context
                     if $context
@@ -761,7 +813,7 @@ define perl_backtrace_5_8_nothreads
                         set $line = 0
                     end
                 end
-                printf "%s:%d\n", $file, $line
+                printf "%s:%d (%s)\n", $file, $line, $type_name
             end
             set $i = $i + 1
         end
@@ -1054,7 +1106,8 @@ define perl_backtrace_5_8_9_an_interp
                         set $line = 0
                     end
                 end
-                printf "%s:%d\n", $file, $line
+                printf "%s:%d (%s)\n", $file, $line, $type_name
+
             else
                 if $DEBUG
                     printf "%d\t... # (context*){cx_type=%d}\n", $i, $type

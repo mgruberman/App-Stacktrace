@@ -55,7 +55,7 @@ elsif ($pstack_pid) {
         $trace,
             qr{
                 (?:
-                    ^t/unthreaded\.t:\d+\n
+                    ^t/unthreaded\.t:\d+\s\(sub\)\n
                 ){10}
             }xm
         );
@@ -66,7 +66,7 @@ elsif ($pstack_pid) {
         Test::More::is( $WAITED_RC >> 8, 0, "exit(0)" );
         Test::More::is( $WAITED_RC & 127, 0, "No signals" );
         Test::More::is( $WAITED_RC & 128, 0, "No core dump" );
-    
+
     exit;
 }
 
